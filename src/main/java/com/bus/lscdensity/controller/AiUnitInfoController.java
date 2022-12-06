@@ -43,15 +43,13 @@ public class AiUnitInfoController {
        }
         return true;
     }
-    public  boolean getOneAiUnitToR(String grapIp){
-        String ip = grapIp.substring(6,16);
-        log.info("grapIp:{}",ip);
-        AiUnitInfo oneAiUiitInfo = aiUnitInfoService.getOneAiUiitInfo(ip.trim());
-        if (oneAiUiitInfo==null){
+    public  boolean getOneAiUnitToR(String aiUnitId){
+        AiUnitInfo oneAiUnitInfo = aiUnitInfoService.getOneAiUnitInfo(aiUnitId);
+        if (oneAiUnitInfo == null){
             log.error("空数据");
             return false;
         }
-        redisUtils.lSet("AIUnit",oneAiUiitInfo);
+        redisUtils.lSet("AIUnit",oneAiUnitInfo);
         return true;
     }
 }

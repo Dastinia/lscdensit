@@ -33,8 +33,8 @@ public class AiUnitInfoServiceImpl extends ServiceImpl<AiUnitInfoMapper, AiUnitI
         }
         return infos;
     }
-    public  AiUnitInfo getOneAiUiitInfo(String grapIp){
-        AiUnitInfo aiUnitInfo = aiUnitInfoMapper.selectOne(Wrappers.<AiUnitInfo>lambdaQuery().eq(AiUnitInfo::getGrabIp, grapIp));
+    public  AiUnitInfo getOneAiUnitInfo(String aiUnitId){
+        AiUnitInfo aiUnitInfo = aiUnitInfoMapper.selectOne(Wrappers.<AiUnitInfo>lambdaQuery().eq(AiUnitInfo::getAiUnitId, aiUnitId));
         if (aiUnitInfo==null){
             return null;
         }

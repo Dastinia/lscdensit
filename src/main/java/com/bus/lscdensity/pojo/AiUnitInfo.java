@@ -39,7 +39,7 @@ public class AiUnitInfo implements Serializable {
     private String grabIp;
 
     @ApiModelProperty(value = "抓取端口")
-    private Integer grapPort;
+    private Integer grabPort;
 
     @ApiModelProperty(value = "Redis节点ip")
     private String redisIp;

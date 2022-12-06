@@ -15,7 +15,22 @@ mybatis-plus:
 docker_host: tcp://10.1.1.205:7788/
 myserver:
   user: root
-  password: cqk@lab607
+  password: 660077
+
+docker:
+  kafkaserviceimage:
+    name: kafkaservice
+    label: 1.0
+  watchserviceimage:
+    name: watchservice
+    label: 1.0
+  redis:
+    label: latest
+  modelserviceimage:
+    name: busmodelservice
+    label: 1.0
+
+
 
 watchservicecmd:
   bash /opt/redis-6.2.7/deps/hiredis/send_to_redis/watch.sh

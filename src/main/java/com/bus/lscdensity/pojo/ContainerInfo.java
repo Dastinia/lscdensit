@@ -57,5 +57,5 @@ public class ContainerInfo {
     private String serverIp;
 
     @ApiModelProperty(value = "docker服务端口")
-    private int serverPort;
+    private Integer serverPort;
 }

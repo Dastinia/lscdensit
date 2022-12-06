@@ -4,8 +4,11 @@ import lombok.Data;
 
 @Data
 public class RemoteInfo {
-    // todo 提醒祥哥发送ai_unit_id字段给我
+
+    // 默认数据redis与模型运行与同一物理机上。故不设置dataRedisIp
     private String aiUnitId;
-    private  String dockerIp;
-    private  String serverIp;
+    private String kafkaServiceIp;
+    private String watchServiceIp;
+    private String modelServiceIp;
+    private String controlRedisIp;
 }

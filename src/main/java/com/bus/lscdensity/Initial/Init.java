@@ -18,18 +18,18 @@ public class Init {
     @Autowired
     ServiceConfigurationController serviceConfigurationController;
     @Autowired
-    VehicleInfoController vehicleInfoControlle;
+    VehicleInfoController vehicleInfoController;
     @Autowired
     VehicleInputUnitController vehicleInputUnitController;
 
-    public void run (String grapIp){
-        boolean b = aiUnitInfoController.getOneAiUnitToR(grapIp);
-        log.info("写入成功"+b);
-        boolean b1 = serviceConfigurationController.getOneserviceConfigurationInfotoR(grapIp);
-        log.info("写入成功"+b1);
-        boolean b2 = vehicleInfoControlle.vehicleInfoToR();
-        log.info("写入成功"+b2);
-        boolean b3 = vehicleInputUnitController.vehicleInputUnitInfoToR(grapIp);
-        log.info("写入成功"+b3);
+    public void run (String aiUnitId){
+        boolean b = aiUnitInfoController.getOneAiUnitToR(aiUnitId);
+        log.info("aiunitInfo写入redis:" + b);
+        boolean b1 = serviceConfigurationController.getOneserviceConfigurationInfotoR(aiUnitId);
+        log.info("serviceConfiguration写入redis:" + b1);
+//        boolean b2 = vehicleInfoController.vehicleInfoToR();
+//        log.info("vehicleInfo写入redis:" + b2);
+        boolean b3 = vehicleInputUnitController.vehicleInputUnitInfoToR(aiUnitId);
+        log.info("vechicleInput写入redis:" + b3);
     }
 }

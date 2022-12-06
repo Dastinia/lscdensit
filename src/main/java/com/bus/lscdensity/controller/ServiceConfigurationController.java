@@ -37,9 +37,8 @@ public class ServiceConfigurationController {
         }
         return  true;
     }
-    public  boolean getOneserviceConfigurationInfotoR(String grapIp){
-        String ip = grapIp.substring(6,16);
-        ServiceConfiguration serviceConfigurationinfo = serviceimpl.getOneServiceConfigurationInfo(ip);
+    public  boolean getOneserviceConfigurationInfotoR(String aiUnitId){
+        ServiceConfiguration serviceConfigurationinfo = serviceimpl.getOneServiceConfigurationInfo(aiUnitId);
         if(serviceConfigurationinfo==null) {
             return false;
         }

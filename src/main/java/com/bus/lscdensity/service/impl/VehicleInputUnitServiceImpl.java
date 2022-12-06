@@ -36,8 +36,8 @@ public class VehicleInputUnitServiceImpl extends ServiceImpl<VehicleInputUnitMap
         return list;
     }
 
-    public VehicleInputUnit getOneVehicleInputUnit(String grapIp){
-        ServiceConfiguration serviceConfiguration = serviceConfigurationMapper.selectOne(Wrappers.<ServiceConfiguration>lambdaQuery().eq(ServiceConfiguration::getServerIp1, grapIp));
+    public VehicleInputUnit getOneVehicleInputUnit(String aiUnitId){
+        ServiceConfiguration serviceConfiguration = serviceConfigurationMapper.selectOne(Wrappers.<ServiceConfiguration>lambdaQuery().eq(ServiceConfiguration::getServerId, aiUnitId));
         return vehicleInputUnitMapper.selectOne(Wrappers.<VehicleInputUnit>lambdaQuery().eq(VehicleInputUnit::getServerId, serviceConfiguration.getServerId()));
     }
 }

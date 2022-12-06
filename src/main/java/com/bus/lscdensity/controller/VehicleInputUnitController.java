@@ -28,9 +28,8 @@ public class VehicleInputUnitController {
     VehicleInputUnitServiceImpl vehicleInputUnitService;
     @Autowired
     RedisUtils redisUtils;
-    public  boolean  vehicleInputUnitInfoToR(String grapIp){
-        String ip = grapIp.substring(6,16);
-        VehicleInputUnit oneVehicleInputUnit = vehicleInputUnitService.getOneVehicleInputUnit(ip);
+    public  boolean  vehicleInputUnitInfoToR(String aiUnitId){
+        VehicleInputUnit oneVehicleInputUnit = vehicleInputUnitService.getOneVehicleInputUnit(aiUnitId);
         if (oneVehicleInputUnit==null){
             return false;
         }

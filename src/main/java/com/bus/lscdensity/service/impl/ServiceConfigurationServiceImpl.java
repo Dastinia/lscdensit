@@ -30,8 +30,8 @@ public class ServiceConfigurationServiceImpl extends ServiceImpl<ServiceConfigur
         }
         return select;
     }
-    public ServiceConfiguration getOneServiceConfigurationInfo(String grapIp){
-        ServiceConfiguration one = service.selectOne(Wrappers.<ServiceConfiguration>lambdaQuery().eq(ServiceConfiguration::getServerIp1, grapIp));
+    public ServiceConfiguration getOneServiceConfigurationInfo(String aiUnitId){
+        ServiceConfiguration one = service.selectOne(Wrappers.<ServiceConfiguration>lambdaQuery().eq(ServiceConfiguration::getServerId, aiUnitId));
         if (one==null)return null;
         return one;
     }

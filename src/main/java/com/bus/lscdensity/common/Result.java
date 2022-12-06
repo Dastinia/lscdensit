@@ -9,8 +9,8 @@ public class Result {
     private Object obj;
 
     public  Result(boolean flag,Object obj, String errMsg){
-        this.errMsg=errMsg;
-        this.success=flag;
+        this.errMsg = errMsg;
+        this.success = flag;
         this.obj = obj;
     }
 }
