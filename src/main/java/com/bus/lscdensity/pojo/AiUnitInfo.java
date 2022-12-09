@@ -29,10 +29,14 @@ public class AiUnitInfo implements Serializable {
 
     @ApiModelProperty(value = "AI复合功能单元id")
     @TableId(value = "ai_unit_id", type = IdType.ID_WORKER)
-    private Integer aiUnitId;
+    private String aiUnitId;
 
-    @ApiModelProperty(value = "车辆输入单元列表")
-    private Integer vehicleInputId;
+    @ApiModelProperty(value = "车辆输入单元列表id")
+    private String vehicleInputId;
+
+    @ApiModelProperty(value = "抓取服务器id")
+    @TableField("grab_server_id")
+    private String grabServerId;
 
     @ApiModelProperty(value = "抓取节点ip")
     @TableField("grab_ip")
@@ -40,6 +44,12 @@ public class AiUnitInfo implements Serializable {
 
     @ApiModelProperty(value = "抓取端口")
     private Integer grabPort;
+
+    @ApiModelProperty(value = "AI服务器id")
+    private String aiServerId;
+
+    @ApiModelProperty(value = "AI服务器ip")
+    private String aiServerIp;
 
     @ApiModelProperty(value = "Redis节点ip")
     private String redisIp;
@@ -51,17 +61,11 @@ public class AiUnitInfo implements Serializable {
     @ApiModelProperty(value = "Redis节点控制流端口")
     private Integer redisControlPort;
 
-    @ApiModelProperty(value = "所属公司id")
-    private String company;
-
     @ApiModelProperty(value = "启动时间")
     private Date startTime;
 
     @ApiModelProperty(value = "计划终止时间")
     private Date planStopTime;
-
-    @ApiModelProperty(value = "服务收费标准")
-    private String serviceFeeStandard;
 
     @ApiModelProperty(value = "累计收费")
     private Double totalCharge;

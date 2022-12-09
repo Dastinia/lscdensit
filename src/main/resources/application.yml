@@ -2,7 +2,7 @@ spring:
   datasource:
     password: 123456
     username: root
-    url: jdbc:mysql://10.1.1.208:3306/AI_BUS?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    url: jdbc:mysql://10.1.1.106:3306/AI_BUS?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     port: 6379
@@ -25,10 +25,11 @@ docker:
     name: watchservice
     label: 1.0
   redis:
-    label: latest
+    name: redis
+    label: 3.0.6
   modelserviceimage:
     name: busmodelservice
-    label: 1.0
+    label: 1.1
 
 
 

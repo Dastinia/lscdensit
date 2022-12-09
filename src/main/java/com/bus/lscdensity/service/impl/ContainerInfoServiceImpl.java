@@ -41,7 +41,7 @@ public class ContainerInfoServiceImpl extends ServiceImpl<ContainerInfoMapper, C
     }
 
     // 创建容器信息入库
-    public boolean saveByResponse(CreateContainerResponse response, DockerClient dockerClient, String aiUnitId, String serverIp, String name, String func) {
+    public boolean saveByResponse(CreateContainerResponse response, DockerClient dockerClient, Integer aiUnitId, String serverIp, String name, String func) {
         InspectContainerResponse inspectContainerResponse = containsService.getContainsInfo(dockerClient, response.getId());
 
         ContainerInfo newContainerInfo = new ContainerInfo();

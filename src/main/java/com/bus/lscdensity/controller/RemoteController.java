@@ -6,8 +6,10 @@ import com.bus.lscdensity.common.Result;
 import com.bus.lscdensity.dockerjava.dockerservice.impl.ContainsServiceImpl;
 import com.bus.lscdensity.dockerjava.utils.DockerClientConnect;
 import com.bus.lscdensity.dockerjava.utils.DockerContainsUtils;
+import com.bus.lscdensity.pojo.AiUnitInfo;
 import com.bus.lscdensity.pojo.ContainerInfo;
 import com.bus.lscdensity.pojo.RemoteInfo;
+import com.bus.lscdensity.service.impl.AiUnitInfoServiceImpl;
 import com.bus.lscdensity.service.impl.ContainerInfoServiceImpl;
 import com.bus.lscdensity.utils.SSHUtils;
 import com.github.dockerjava.api.DockerClient;
@@ -20,13 +22,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("remote")
 @Slf4j
-public class RemoteStartController {
+public class RemoteController {
        @Autowired
        ContainsServiceImpl containsService;
 
@@ -54,6 +55,9 @@ public class RemoteStartController {
        @Value("${docker.modelserviceimage.label}")
        String modelLabel;
 
+       @Value("${docker.redis.name}")
+       String redisImageName;
+
        @Value("${docker.redis.label}")
        String redisLabel;
 
@@ -69,24 +73,42 @@ public class RemoteStartController {
 //       @Value("${aiservicecmd}")
 //       String aiCmd;
 
-       @PostMapping("/new")
-       public Result createContainer(@RequestBody RemoteInfo info) throws IOException {
+       Map<String,DockerClient> dockerClientMap = new HashMap<>();
+       int maxSize = 20; // map的最大容
+
+       @PostMapping("/create")
+       public Result creatContainer(@RequestBody RemoteInfo info) throws IOException {
+              log.info(info.getAiUnitId());
+              log.info(info.getKafkaServiceIp());
+              log.info(info.getModelServiceIp());
+
               String aiUnitId = info.getAiUnitId();
               // 初始化
               init.run(aiUnitId);
 
               // 连接镜像所在服务器，镜像提前在服务器中准备好
 //              DockerClient controlRedisDClient = DockerClientConnect.connectDocker(info.getControlRedisIp());
-//              DockerClient dataRedisDClient = DockerClientConnect.connectDocker(info.getModelServiceIp());
+              DockerClient dataRedisDClient = DockerClientConnect.connectDocker(info.getModelServiceIp());
               DockerClient kafkaDClient = DockerClientConnect.connectDocker(info.getKafkaServiceIp());
-//              DockerClient watchDClient = DockerClientConnect.connectDocker(info.getWatchServiceIp());
+//              DockerClient moniterDClient = DockerClientConnect.connectDocker(info.getmoniterServiceIp());
               DockerClient modelDClient = DockerClientConnect.connectDocker(info.getModelServiceIp());
+
+              // 将已经建立的链接入队, 容量不足则先出队再入队
+              if (dockerClientMap.size() <= maxSize - 3) {
+                     dockerClientMap.put(info.getModelServiceIp().substring(6,16), dataRedisDClient);
+                     dockerClientMap.put(info.getKafkaServiceIp().substring(6,16), kafkaDClient);
+                     dockerClientMap.put(info.getModelServiceIp().substring(6,16), modelDClient);
+              } else {
+                     //todo 可以用LRU调度策略
+                     ;
+              }
 
               // 创建镜像
 //              CreateContainerResponse controlRedisResponse = containsService.createContainer(controlRedisDClient, "controlRedis-"+ aiUnitId, "redis:" + redisLabel, 6380,6379);
-//              CreateContainerResponse dataRedisResponse = containsService.createContainer(dataRedisDClient, "dataRedis-"+ aiUnitId, "redis:" + redisLabel,6379,6379);
+              CreateContainerResponse dataRedisResponse = containsService.createContainer(dataRedisDClient,
+                      "dataRedis-"+ aiUnitId, redisImageName + ":" + redisLabel,6379,6379,new ArrayList<>());
               CreateContainerResponse kafkaServiceResponse = containsService.createContainer(kafkaDClient, "kafkaService-"+ aiUnitId, kafkaImageName + ":" + kafkaLabel);
-//              CreateContainerResponse watchServiceResponse = containsService.createContainer(watchDClient, "watchService-"+ info.getWatchServiceIp(), watchImageName + ":" + watchLabel);
+//              CreateContainerResponse moniterServiceResponse = containsService.createContainer(moniterDClient, "moniterService-"+ info.getmoniterServiceIp(), moniterImageName + ":" + moniterLabel);
               // 创建模型镜像
               List<String> entryPoint = new ArrayList<String>() {
                      {
@@ -103,37 +125,49 @@ public class RemoteStartController {
               };
               CreateContainerResponse modelServiceResponse = containsService.createContainer(modelDClient, "busModelService-"+ aiUnitId, "busmodelservice:1.0",new ArrayList<>(),bindList,0L,0L, new ArrayList<Integer>(){{add(0);}}, entryPoint);
 
-
-              // 启动容器
-//              containsService.startContainer(controlRedisDClient, controlRedisResponse.getId());
-//              log.info( "controlRedisId:{}", controlRedisResponse.getId());
-//              containsService.startContainer(dataRedisDClient, dataRedisResponse.getId());
-//              log.info( "dataRedisId:{}", dataRedisResponse.getId());
-              containsService.startContainer(kafkaDClient, kafkaServiceResponse.getId());
-              log.info( "kafkaId:{}",kafkaServiceResponse.getId());
-//              containsService.startContainer(watchDClient, watchServiceResponse.getId());
-//              log.info( "watchId:{}",watchServiceResponse.getId());
-              containsService.startContainer(modelDClient, modelServiceResponse.getId());
-              log.info( "modelId:{}",modelServiceResponse.getId());
-
               // 新容器信息入库
 //              containerInfoService.saveByResponse(controlRedisResponse, controlRedisDClient, aiUnitId, info.getControlRedisIp().substring(6,16),"controlRedis" +aiUnitId, "控制流redis");
-//              containerInfoService.saveByResponse(dataRedisResponse, dataRedisDClient, aiUnitId, info.getModelServiceIp().substring(6,16), "dataRedis"+ aiUnitId, "数据流redis");
-              containerInfoService.saveByResponse(kafkaServiceResponse, kafkaDClient, aiUnitId, info.getKafkaServiceIp().substring(6,16),"kafkaService"+ aiUnitId, "卡夫卡抓取服务");
-//              boolean watchInfoSaved = containerInfoService.saveByResponse(watchServiceResponse, kafkaDClient, aiUnitId, info.getWatchServiceIp().substring(6,16),"watchService-" + aiUnitId, "监控服务");
-              containerInfoService.saveByResponse(modelServiceResponse, modelDClient, aiUnitId, info.getModelServiceIp().substring(6,16), "busModelService" + aiUnitId, "公交车预测模型服务");
+              containerInfoService.saveByResponse(dataRedisResponse, dataRedisDClient, Integer.valueOf(aiUnitId), info.getModelServiceIp().substring(6,16), "dataRedis"+ aiUnitId, "数据流redis");
+              containerInfoService.saveByResponse(kafkaServiceResponse, kafkaDClient, Integer.valueOf(aiUnitId), info.getKafkaServiceIp().substring(6,16),"kafkaService"+ aiUnitId, "卡夫卡抓取服务");
+//              boolean moniterInfoSaved = containerInfoService.saveByResponse(moniterServiceResponse, kafkaDClient, aiUnitId, info.getmoniterServiceIp().substring(6,16),"moniterService-" + aiUnitId, "监控服务");
+              containerInfoService.saveByResponse(modelServiceResponse, modelDClient, Integer.valueOf(aiUnitId), info.getModelServiceIp().substring(6,16), "busModelService" + aiUnitId, "公交车预测模型服务");
               log.info("容器数据入库成功");
 
-              // 启动模型
-//              SSHUtils sshUtils = new SSHUtils(userName, passWord, info.getModelServiceIp().substring(6, 16));
-//              sshUtils.exec(aiCmd);
+              // 测试用
+//              runContainer(info);
 
               return new Result(true,null,"创建成功");
        }
 
+       @PostMapping("/run")
+       public Result runContainer(@RequestBody RemoteInfo info) throws IOException {
+              Integer aiUnitId = Integer.valueOf(info.getAiUnitId());
+              QueryWrapper<ContainerInfo> wrapper = new QueryWrapper<>();
+              wrapper.eq("ai_unit_id", aiUnitId);
+//              wrapper.eq("container_status", "Crea");
+              List<ContainerInfo> containerInfoList = containerInfoService.list(wrapper);
+              if (containerInfoList.size() == 0) {
+                     return new Result(false, null, info.getAiUnitId() + ":服务已删除，请重新创建");
+              }
+              for (ContainerInfo cInfo : containerInfoList) {
+                     DockerClient dockerClient = dockerClientMap.get(cInfo.getServerIp());
+                     if (dockerClient == null) {
+                            dockerClient = DockerClientConnect.connectDocker(
+                                    "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort());
+                     }
+                     DockerContainsUtils.startContainer(dockerClient, cInfo.getContainerId());
+                     ContainerInfo containerInfo = new ContainerInfo();
+                     containerInfo.setContainerId(cInfo.getContainerId());
+                     containerInfo.setContainerStatus("running");
+                     containerInfoService.saveOrUpdate(containerInfo);
+              }
+              log.info("服务" + info.getAiUnitId() + "全容器已运行");
+              return new Result(true,null,"全部容器已运行");
+       }
+
        @PostMapping("/restart")
        public Result restartContainer(@RequestBody RemoteInfo info) throws IOException {
-              String aiUnitId = info.getAiUnitId();
+              Integer aiUnitId = Integer.valueOf(info.getAiUnitId());
               QueryWrapper<ContainerInfo> wrapper = new QueryWrapper<>();
               wrapper.eq("ai_unit_id", aiUnitId);
               wrapper.ne("container_status", "deleted");
@@ -142,22 +176,25 @@ public class RemoteStartController {
                      return new Result(false, null, info.getAiUnitId() + ":服务已删除，请重新创建");
               }
               for (ContainerInfo cInfo : containerInfoList) {
-                     String dockerHost = "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort();
-                     DockerClient dockerClient = DockerClientConnect.connectDocker(dockerHost);
+                     DockerClient dockerClient = dockerClientMap.get(cInfo.getServerIp());
+                     if (dockerClient == null) {
+                            dockerClient = DockerClientConnect.connectDocker(
+                                    "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort());
+                     }
                      DockerContainsUtils.restartContainer(dockerClient, cInfo.getContainerId());
                      ContainerInfo containerInfo = new ContainerInfo();
                      containerInfo.setContainerId(cInfo.getContainerId());
                      containerInfo.setContainerStatus("running");
                      containerInfoService.saveOrUpdate(containerInfo);
-                     dockerClient.close();
               }
+              log.info("服务" + info.getAiUnitId() + "全容器已重启");
               return new Result(true, null, info.getAiUnitId() + ":全部容器已重启");
        }
 
        @PostMapping("/pause")
        public Result pauseContainer(@RequestBody RemoteInfo info) throws IOException {
 
-              String aiUnitId = info.getAiUnitId();
+              Integer aiUnitId = Integer.valueOf(info.getAiUnitId());
               QueryWrapper<ContainerInfo> wrapper = new QueryWrapper<>();
               wrapper.eq("ai_unit_id", aiUnitId);
               wrapper.eq("container_status", "running");
@@ -166,21 +203,24 @@ public class RemoteStartController {
                      return new Result(false, null, info.getAiUnitId() + ":请确认服务正在运行");
               }
               for (ContainerInfo cInfo : containerInfoList) {
-                     String dockerHost = "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort();
-                     DockerClient dockerClient = DockerClientConnect.connectDocker(dockerHost);
+                     DockerClient dockerClient = dockerClientMap.get(cInfo.getServerIp());
+                     if (dockerClient == null) {
+                            dockerClient = DockerClientConnect.connectDocker(
+                                    "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort());
+                     }
                      DockerContainsUtils.pauseContainer(dockerClient, cInfo.getContainerId());
                      ContainerInfo containerInfo = new ContainerInfo();
                      containerInfo.setContainerId(cInfo.getContainerId());
                      containerInfo.setContainerStatus("paused");
                      containerInfoService.update(containerInfo, null);
-                     dockerClient.close();
               }
+              log.info("服务" + info.getAiUnitId() + "全容器已暂停");
               return new Result(true, null, info.getAiUnitId() + "全部容器已暂停");
        }
 
        @PostMapping("/unpause")
        public Result unpauseContainer(@RequestBody RemoteInfo info) throws IOException {
-              String aiUnitId = info.getAiUnitId();
+              Integer aiUnitId = Integer.valueOf(info.getAiUnitId());
               QueryWrapper<ContainerInfo> wrapper = new QueryWrapper<>();
               wrapper.eq("ai_unit_id", aiUnitId);
               wrapper.eq("container_status", "paused");
@@ -189,52 +229,62 @@ public class RemoteStartController {
                      return new Result(false, null, info.getAiUnitId() + ":请确认服务处于暂停");
               }
               for (ContainerInfo cInfo : containerInfoList) {
-                     String dockerHost = "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort();
-                     DockerClient dockerClient = DockerClientConnect.connectDocker(dockerHost);
+                     DockerClient dockerClient = dockerClientMap.get(cInfo.getServerIp());
+                     if (dockerClient == null) {
+                            dockerClient = DockerClientConnect.connectDocker(
+                                    "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort());
+                     }
                      DockerContainsUtils.unpauseContainer(dockerClient, cInfo.getContainerId());
                      ContainerInfo containerInfo = new ContainerInfo();
                      containerInfo.setContainerId(cInfo.getContainerId());
                      containerInfo.setContainerStatus("running");
                      containerInfoService.saveOrUpdate(containerInfo);
-                     dockerClient.close();
               }
+              log.info("服务" + info.getAiUnitId() + "全容器已从暂停中恢复");
               return new Result(true, null, info.getAiUnitId() + "全部容器已从暂停中恢复");
        }
 
        @PostMapping("/stop")
        public Result stopContainer(@RequestBody RemoteInfo info) throws IOException {
-              String aiUnitId = info.getAiUnitId();
+              Integer aiUnitId = Integer.valueOf(info.getAiUnitId());
               QueryWrapper<ContainerInfo> wrapper = new QueryWrapper<>();
               wrapper.eq("ai_unit_id", aiUnitId);
               wrapper.eq("container_status", "running");
               for (ContainerInfo cInfo : containerInfoService.list(wrapper)) {
-                     String dockerHost = "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort();
-                     DockerClient dockerClient = DockerClientConnect.connectDocker(dockerHost);
+                     DockerClient dockerClient = dockerClientMap.get(cInfo.getServerIp());
+                     if (dockerClient == null) {
+                            dockerClient = DockerClientConnect.connectDocker(
+                                    "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort());
+                     }
                      DockerContainsUtils.stopContainer(dockerClient, cInfo.getContainerId());
                      ContainerInfo containerInfo = new ContainerInfo();
                      containerInfo.setContainerId(cInfo.getContainerId());
-                     containerInfo.setContainerStatus("existed");
+                     containerInfo.setContainerStatus("exited");
                      containerInfoService.saveOrUpdate(containerInfo);
-                     dockerClient.close();
               }
+              log.info("服务" + info.getAiUnitId() + "全容器已停止");
               return new Result(true, null, info.getAiUnitId() + "全部容器已停止");
        }
 
        @PostMapping("/remove")
        public Result deleteContainer(@RequestBody RemoteInfo info) throws IOException {
-              String aiUnitId = info.getAiUnitId();
+              Integer aiUnitId = Integer.valueOf(info.getAiUnitId());
               QueryWrapper<ContainerInfo> wrapper = new QueryWrapper<>();
-              wrapper.eq("ai_unit_id", aiUnitId).eq("container_status", "existed");
+              wrapper.eq("ai_unit_id", aiUnitId).eq("container_status", "exited");
               List<ContainerInfo> containerInfoList = containerInfoService.getContainerInfo();
               for (ContainerInfo cInfo : containerInfoList) {
-                     String dockerHost = "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort();
-                     DockerClient dockerClient = DockerClientConnect.connectDocker(dockerHost);
+                     DockerClient dockerClient = dockerClientMap.get(cInfo.getServerIp());
+                     if (dockerClient == null) {
+                            dockerClient = DockerClientConnect.connectDocker(
+                                    "tcp://" + cInfo.getServerIp() + ":" + cInfo.getServerPort());
+                     }
                      DockerContainsUtils.removeContainer(dockerClient, cInfo.getContainerId());
                      ContainerInfo containerInfo = new ContainerInfo();
                      containerInfo.setContainerId(cInfo.getContainerId());
                      containerInfo.setContainerStatus("deleted");
                      containerInfoService.saveOrUpdate(containerInfo);
               }
-              return new Result(true, null, info.getAiUnitId() + "全部容器已删除，服务删除");
+              log.info("服务" + info.getAiUnitId() + "全容器已删除");
+              return new Result(true, null, info.getAiUnitId() + "全部容器已删除");
        }
 }

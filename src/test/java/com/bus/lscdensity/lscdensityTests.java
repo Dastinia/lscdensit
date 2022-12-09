@@ -1,5 +1,6 @@
 package com.bus.lscdensity;
 
+import com.bus.lscdensity.Initial.Init;
 import com.bus.lscdensity.dockerjava.dockerservice.impl.ContainsServiceImpl;
 import com.bus.lscdensity.dockerjava.utils.DockerClientConnect;
 import com.github.dockerjava.api.DockerClient;
@@ -45,5 +46,13 @@ public class lscdensityTests {
 
         System.out.println(modelServiceResponse.getId());
         containsService.startContainer(modelDClient, modelServiceResponse.getId());
+    }
+
+    @Autowired
+    Init init;
+
+    @Test
+    public void InitTest() {
+        init.run("2022120102030001");
     }
 }

@@ -23,22 +23,23 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
-public class ServiceConfiguration implements Serializable {
+public class ServerConfiguration implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * 服务器id
      */
-    @TableId(value = "service_id", type = IdType.AUTO)
+    @TableId(value = "server_id", type = IdType.AUTO)
     private Integer serverId;
 
     /**
      * 服务器类别（抓取节点或AI计算节点）
      */
-    @TableField("service_type")
+    @TableField("server_type")
     private String serverType;
 
+    @TableField("server_ip1")
     private String serverIp1;
 
     private String serverIp2;
@@ -50,7 +51,12 @@ public class ServiceConfiguration implements Serializable {
     /**
      * 服务配置详细id，在服务配置详细ip表
      */
-    private Integer serverDetailId;
 
+    private String serverDetailId;
 
+    @TableField("server_user")
+    private String serverUser;
+
+    @TableField("server_passwd")
+    private String serverPasswd;
 }

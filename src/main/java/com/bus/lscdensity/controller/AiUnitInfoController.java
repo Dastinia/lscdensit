@@ -39,7 +39,7 @@ public class AiUnitInfoController {
         //写入redis
         for (int i = 0; i < info.size(); i++) {
             AiUnitInfo aiUnitInfo = info.get(i);
-            redisUtils.lSet("AIUnit",aiUnitInfo);
+            redisUtils.lSet("AiUnitInfos",aiUnitInfo);
        }
         return true;
     }
@@ -49,7 +49,9 @@ public class AiUnitInfoController {
             log.error("空数据");
             return false;
         }
-        redisUtils.lSet("AIUnit",oneAiUnitInfo);
+//        redisUtils.lSet("AiUnitInfo",oneAiUnitInfo);
+        redisUtils.lSet("AiUnitInfoForKafka",oneAiUnitInfo); // kafkaService消费
+        redisUtils.lSet("DataRedisInfo", oneAiUnitInfo); // ModelService消费
         return true;
     }
 }

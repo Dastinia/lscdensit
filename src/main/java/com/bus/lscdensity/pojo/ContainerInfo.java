@@ -21,7 +21,7 @@ public class ContainerInfo {
 
     @ApiModelProperty(value = "关联的AI单元id")
     @TableField(value = "ai_unit_id")
-    private String aiUnitId;
+    private Integer aiUnitId;
 
     @ApiModelProperty(value = "容器id")
     @TableId

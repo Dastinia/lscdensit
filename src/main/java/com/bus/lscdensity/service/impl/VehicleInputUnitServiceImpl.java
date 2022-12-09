@@ -1,8 +1,6 @@
 package com.bus.lscdensity.service.impl;
 
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.bus.lscdensity.mapper.ServiceConfigurationMapper;
-import com.bus.lscdensity.pojo.ServiceConfiguration;
+import com.bus.lscdensity.mapper.ServerConfigurationMapper;
 import com.bus.lscdensity.pojo.VehicleInputUnit;
 import com.bus.lscdensity.mapper.VehicleInputUnitMapper;
 import com.bus.lscdensity.service.VehicleInputUnitService;
@@ -26,7 +24,7 @@ public class VehicleInputUnitServiceImpl extends ServiceImpl<VehicleInputUnitMap
     VehicleInputUnitMapper vehicleInputUnitMapper;
 
     @Autowired
-    ServiceConfigurationMapper serviceConfigurationMapper;
+    ServerConfigurationMapper serviceConfigurationMapper;
     @Override
     public List<VehicleInputUnit> getVehicleInputUnit() {
         List<VehicleInputUnit> list = vehicleInputUnitMapper.selectList(null);
@@ -36,8 +34,7 @@ public class VehicleInputUnitServiceImpl extends ServiceImpl<VehicleInputUnitMap
         return list;
     }
 
-    public VehicleInputUnit getOneVehicleInputUnit(String aiUnitId){
-        ServiceConfiguration serviceConfiguration = serviceConfigurationMapper.selectOne(Wrappers.<ServiceConfiguration>lambdaQuery().eq(ServiceConfiguration::getServerId, aiUnitId));
-        return vehicleInputUnitMapper.selectOne(Wrappers.<VehicleInputUnit>lambdaQuery().eq(VehicleInputUnit::getServerId, serviceConfiguration.getServerId()));
+    public VehicleInputUnit getOneVehicleInputUnit(String vehicleInputId){
+        return vehicleInputUnitMapper.selectById(vehicleInputId);
     }
 }

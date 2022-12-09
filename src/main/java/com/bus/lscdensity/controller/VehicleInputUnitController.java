@@ -1,8 +1,10 @@
 package com.bus.lscdensity.controller;
 
 
+import com.bus.lscdensity.pojo.AiUnitInfo;
 import com.bus.lscdensity.pojo.VehicleInfo;
 import com.bus.lscdensity.pojo.VehicleInputUnit;
+import com.bus.lscdensity.service.impl.AiUnitInfoServiceImpl;
 import com.bus.lscdensity.service.impl.VehicleInfoServiceImpl;
 import com.bus.lscdensity.service.impl.VehicleInputUnitServiceImpl;
 import com.bus.lscdensity.utils.RedisUtils;
@@ -28,12 +30,17 @@ public class VehicleInputUnitController {
     VehicleInputUnitServiceImpl vehicleInputUnitService;
     @Autowired
     RedisUtils redisUtils;
+    @Autowired
+    AiUnitInfoServiceImpl aiUnitInfoService;
+
     public  boolean  vehicleInputUnitInfoToR(String aiUnitId){
-        VehicleInputUnit oneVehicleInputUnit = vehicleInputUnitService.getOneVehicleInputUnit(aiUnitId);
+        AiUnitInfo oneAiUnitInfo = aiUnitInfoService.getOneAiUnitInfo(aiUnitId);
+        VehicleInputUnit oneVehicleInputUnit = vehicleInputUnitService.getById(oneAiUnitInfo.getVehicleInputId());
         if (oneVehicleInputUnit==null){
             return false;
         }
-        redisUtils.lSet("InputUnit",oneVehicleInputUnit);
+//        redisUtils.lSet("VehicleInputUnit",oneVehicleInputUnit);
+        redisUtils.lSet("vehicleInputUnitForKafka",oneVehicleInputUnit);
         return true;
     }
 }

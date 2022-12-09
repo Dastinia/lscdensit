@@ -12,7 +12,8 @@ public interface ContainsService {
 
     CreateContainerResponse createContainer(DockerClient client, String containsName, String imageName);
 
-    CreateContainerResponse createContainer(DockerClient client, String containsName, String imageName, Integer bindPort, Integer exposePort);
+    CreateContainerResponse createContainer(DockerClient client, String containsName, String imageName,
+                                            Integer bindPort, Integer exposePort, List<String> envList);
 
     CreateContainerResponse createContainer(DockerClient client, String containsName, String imageName,
                                             List<String> envList, List<Bind> bindList, Long cpu, Long memory, List<Integer> gpuList, List<String> entryPoint);

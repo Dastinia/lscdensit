@@ -31,9 +31,10 @@ public class ContainsServiceImpl implements ContainsService {
     }
 
     @Override
-    public CreateContainerResponse createContainer(DockerClient client, String containsName, String imageName, Integer bindPort, Integer exposePort) {
+    public CreateContainerResponse createContainer(DockerClient client, String containsName, String imageName, Integer bindPort, Integer exposePort, List<String> envList) {
         return client.createContainerCmd(imageName)
                 .withName(containsName)
+                .withEnv(envList)
                 .withHostConfig(newHostConfig().withPortBindings(new Ports(new ExposedPort(exposePort), Ports.Binding.bindPort(bindPort))))
                 .exec();
     }

@@ -27,7 +27,7 @@ public class VehicleInputUnit implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "vehicle_input_id", type = IdType.AUTO)
-    private Integer vehicleInputId;
+    private String vehicleInputId;
 
     /**
      * 单元名
@@ -38,16 +38,6 @@ public class VehicleInputUnit implements Serializable {
      * 单元topic
      */
     private String unitTopic;
-
-    /**
-     * 单元包含的车辆数目
-     */
-    private Integer unitNum;
-
-    /**
-     * 抓取服务器id
-     */
-    private String serverId;
 
     /**
      * kafka服务端的IP
