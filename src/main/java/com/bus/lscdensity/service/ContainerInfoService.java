@@ -15,5 +15,5 @@ import java.util.List;
  */
 public interface ContainerInfoService extends IService<ContainerInfo> {
     List<ContainerInfo> getContainerInfo();
-    public boolean saveByResponse(CreateContainerResponse response, DockerClient dockerClient, Integer aiUnitId, String name, String func, String serverIp);
+    public boolean saveByResponse(CreateContainerResponse response, DockerClient dockerClient, String aiUnitId, String name, String func, String serverIp);
 }

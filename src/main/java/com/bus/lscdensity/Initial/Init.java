@@ -30,13 +30,13 @@ public class Init {
 
     public void run (String aiUnitId){
 
-        // todo 向redis发送KafkaService需要的数据
+        // 向redis发送KafkaService需要的数据
         boolean b1 = SendKafkaInfo(aiUnitId);
 
         // 向redis发送MonitorService需要的数据
         boolean b2 = SendMonitorInfo(aiUnitId);
 
-        // todo 向redis发送ModelService需要的数据
+        // 向redis发送ModelService需要的数据
         boolean b3 = SendModelInfo(aiUnitId);
 
     }
@@ -49,21 +49,23 @@ public class Init {
         return true;
     }
 
-    public boolean SendMonitorInfo(String aiUnited) {
-        AiUnitInfo oneAiUnitInfo = aiUnitInfoService.getOneAiUnitInfo(aiUnited);
+    public boolean SendMonitorInfo(String aiUnitId) {
+        AiUnitInfo oneAiUnitInfo = aiUnitInfoService.getOneAiUnitInfo(aiUnitId);
         String kafkaServiceIp = oneAiUnitInfo.getGrabIp();
         ServerConfiguration sc1 = serverConfigurationService.getById(oneAiUnitInfo.getGrabServerId());
         String kafkaUser = sc1.getServerUser();
         String kafkaPasswd = sc1.getServerPasswd();
         String kafkaServerType = sc1.getServerType();
+        String grabServerId = oneAiUnitInfo.getGrabServerId();
 
         String modelServiceIp = oneAiUnitInfo.getAiServerIp();
         ServerConfiguration sc2 = serverConfigurationService.getById(oneAiUnitInfo.getAiServerId());
         String modelUser = sc2.getServerUser();
         String modelPasswd = sc2.getServerPasswd();
         String modelServerType = sc2.getServerType();
+        String aiServerId = oneAiUnitInfo.getAiServerId();
 
-        MonitorInfo monitorInfo = new MonitorInfo(kafkaServiceIp,kafkaUser,kafkaPasswd,kafkaServerType,modelServiceIp,modelUser,modelPasswd,modelServerType);
+        MonitorInfo monitorInfo = new MonitorInfo(aiUnitId,kafkaServiceIp,kafkaUser,kafkaPasswd,kafkaServerType,grabServerId,modelServiceIp,modelUser,modelPasswd,modelServerType,aiServerId);
         log.info(monitorInfo.toString());
         redisUtils.lSet("MonitorInfo", monitorInfo);
         return true;

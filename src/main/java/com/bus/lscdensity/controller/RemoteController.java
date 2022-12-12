@@ -6,12 +6,9 @@ import com.bus.lscdensity.common.Result;
 import com.bus.lscdensity.dockerjava.dockerservice.impl.ContainsServiceImpl;
 import com.bus.lscdensity.dockerjava.utils.DockerClientConnect;
 import com.bus.lscdensity.dockerjava.utils.DockerContainsUtils;
-import com.bus.lscdensity.pojo.AiUnitInfo;
 import com.bus.lscdensity.pojo.ContainerInfo;
 import com.bus.lscdensity.pojo.RemoteInfo;
-import com.bus.lscdensity.service.impl.AiUnitInfoServiceImpl;
 import com.bus.lscdensity.service.impl.ContainerInfoServiceImpl;
-import com.bus.lscdensity.utils.SSHUtils;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.model.Bind;
@@ -60,18 +57,6 @@ public class RemoteController {
 
        @Value("${docker.redis.label}")
        String redisLabel;
-
-//       @Value("${myserver.user}")
-//       String userName;
-//
-//       @Value("${myserver.password}")
-//       String passWord;
-//
-//       @Value("${watchservicecmd}")
-//       String watchCmd;
-//
-//       @Value("${aiservicecmd}")
-//       String aiCmd;
 
        Map<String,DockerClient> dockerClientMap = new HashMap<>();
        int maxSize = 20; // map的最大容
@@ -127,10 +112,10 @@ public class RemoteController {
 
               // 新容器信息入库
 //              containerInfoService.saveByResponse(controlRedisResponse, controlRedisDClient, aiUnitId, info.getControlRedisIp().substring(6,16),"controlRedis" +aiUnitId, "控制流redis");
-              containerInfoService.saveByResponse(dataRedisResponse, dataRedisDClient, Integer.valueOf(aiUnitId), info.getModelServiceIp().substring(6,16), "dataRedis"+ aiUnitId, "数据流redis");
-              containerInfoService.saveByResponse(kafkaServiceResponse, kafkaDClient, Integer.valueOf(aiUnitId), info.getKafkaServiceIp().substring(6,16),"kafkaService"+ aiUnitId, "卡夫卡抓取服务");
+              containerInfoService.saveByResponse(dataRedisResponse, dataRedisDClient, aiUnitId, info.getModelServiceIp().substring(6,16), "dataRedis"+ aiUnitId, "数据流redis");
+              containerInfoService.saveByResponse(kafkaServiceResponse, kafkaDClient, aiUnitId, info.getKafkaServiceIp().substring(6,16),"kafkaService"+ aiUnitId, "卡夫卡抓取服务");
 //              boolean moniterInfoSaved = containerInfoService.saveByResponse(moniterServiceResponse, kafkaDClient, aiUnitId, info.getmoniterServiceIp().substring(6,16),"moniterService-" + aiUnitId, "监控服务");
-              containerInfoService.saveByResponse(modelServiceResponse, modelDClient, Integer.valueOf(aiUnitId), info.getModelServiceIp().substring(6,16), "busModelService" + aiUnitId, "公交车预测模型服务");
+              containerInfoService.saveByResponse(modelServiceResponse, modelDClient, aiUnitId, info.getModelServiceIp().substring(6,16), "busModelService" + aiUnitId, "公交车预测模型服务");
               log.info("容器数据入库成功");
 
               // 测试用
