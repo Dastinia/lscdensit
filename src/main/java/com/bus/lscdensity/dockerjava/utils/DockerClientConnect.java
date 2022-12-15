@@ -26,10 +26,15 @@ public  class DockerClientConnect{
         return instance;
     }
 
-    public static DockerClient connectDocker(String host){
+    public static DockerClient connectDocker(String ip){
+        String host = createHost("tcp", ip, "7788");
         DockerClientConfig dockerClient = DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .withDockerHost(host.trim())
                 .build();
         return DockerClientBuilder.getInstance(dockerClient).build();
+    }
+
+    public static String createHost(String protocol, String ip, String port) {
+        return protocol + "://" + ip + ":" + port;
     }
 }

@@ -2,25 +2,26 @@ spring:
   datasource:
     password: database@lab607
     username: root
-    url: jdbc:mysql://10.1.1.106:3306/AI_BUS?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    url: jdbc:mysql://124.220.223.62:6106/AI_BUS?useSSL=false&useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
     driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
-    port: 6379
-    host: 10.1.1.207
+    port: 9763
+    host: 159.27.184.52
+    password: Zhangzhengxu123.
 mybatis-plus:
   global-config:
     db-config:
       logic-delete-value: 1
       logic-not-delete-value: 0
-docker_host: tcp://10.1.1.205:7788/
-myserver:
-  user: root
-  password: 660077
+docker_host: tcp://124.220.223.62:7788/
+#myserver:
+#  user: root
+#  password: 660077
 
 docker:
   kafkaserviceimage:
     name: kafkaservice
-    label: 1.0
+    label: 1.1
   watchserviceimage:
     name: watchservice
     label: 1.0
@@ -33,10 +34,10 @@ docker:
 
 
 
-watchservicecmd:
-  bash /opt/redis-6.2.7/deps/hiredis/send_to_redis/watch.sh
-aiservicecmd:
-  bash /root/Bus_Group/Bus_peopleEst_s2_v4-Copy/bus.sh
+#watchservicecmd:
+#  bash /opt/redis-6.2.7/deps/hiredis/send_to_redis/watch.sh
+#aiservicecmd:
+#  bash /root/Bus_Group/Bus_peopleEst_s2_v4-Copy/bus.sh
 
 
 
