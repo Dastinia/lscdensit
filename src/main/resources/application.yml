@@ -28,9 +28,12 @@ docker:
   redis:
     name: redis
     label: 3.0.6
-  modelserviceimage:
+  busmodelserviceimage:
     name: busmodelservice
     label: 1.1
+  stationmodelserviceimage:
+    name: stationmodelservice
+    label: 1.0
 
 
 

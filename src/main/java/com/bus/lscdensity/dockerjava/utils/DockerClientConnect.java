@@ -26,8 +26,8 @@ public  class DockerClientConnect{
         return instance;
     }
 
-    public static DockerClient connectDocker(String ip){
-        String host = createHost("tcp", ip, "7788");
+    public static DockerClient connectDocker(String ip, Integer port){
+        String host = createHost("tcp", ip, String.valueOf(port));
         DockerClientConfig dockerClient = DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .withDockerHost(host.trim())
                 .build();

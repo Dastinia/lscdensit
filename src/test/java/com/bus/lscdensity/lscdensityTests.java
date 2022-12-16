@@ -27,7 +27,7 @@ public class lscdensityTests {
 
     @Test
     public void ContainsServiceTest() {
-        DockerClient modelDClient = DockerClientConnect.connectDocker("tcp://10.1.1.214:7788");
+        DockerClient modelDClient = DockerClientConnect.connectDocker("10.1.1.214", 7788);
 
         List<String> entryPoint = new ArrayList<String>() {
             {
@@ -53,6 +53,8 @@ public class lscdensityTests {
 
     @Test
     public void InitTest() {
-        init.run("2022120102030001");
+        for (int i = 0; i < 10; ++i) {
+            init.run("2022120102030001");
+        }
     }
 }

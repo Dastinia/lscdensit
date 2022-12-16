@@ -41,7 +41,7 @@ public class ContainerInfoServiceImpl extends ServiceImpl<ContainerInfoMapper, C
     }
 
     // 创建容器信息入库
-    public boolean saveByResponse(CreateContainerResponse response, DockerClient dockerClient, String aiUnitId, String serverIp, String name, String func) {
+    public boolean saveByResponse(CreateContainerResponse response, DockerClient dockerClient, String aiUnitId, String serverIp, Integer serverPort, String name, String func) {
         InspectContainerResponse inspectContainerResponse = containsService.getContainsInfo(dockerClient, response.getId());
 
         ContainerInfo newContainerInfo = new ContainerInfo();
@@ -55,7 +55,7 @@ public class ContainerInfoServiceImpl extends ServiceImpl<ContainerInfoMapper, C
         newContainerInfo.setCreateTime(new Date());
         // 设置docker服务器信息
         newContainerInfo.setServerIp(serverIp);
-        newContainerInfo.setServerPort(7788); // todo 暂时写死
+        newContainerInfo.setServerPort(serverPort);
 
         return containerInfoMapper.insert(newContainerInfo) != 0;
     }
